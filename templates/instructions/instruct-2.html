@@ -1,0 +1,52 @@
+<div id="container-instructions">
+
+    <h1>Instructions</h1>
+
+    <hr />
+
+    <div class="instructions well">
+
+        <!--The goal of the experiment is to replicate the experiments by Ronald A. Rensink and Gideon Baldridge. A participant is asked to distinguish two scatterplots by reporting the one with higher correlation. -->
+
+        The experiment contains 50 trials, and may end early if the user’s ability to discriminate between the two correlation values depicted has stabilized. Each trial is randomly generated based on the reaction of the previous trial.
+        <br>
+        In each trial, please try to estimate the correlation coefficient of two side by side plots. And press "L" if you think the left plot has a higher correlation, otherwise press "R" to select the right figure.
+        Then the next trial will be generated and displayed in the same way. 
+        <br>
+
+        Here is an example. The left figure has r = 0.7, while the right one has r = 0.8. So the right figure has higher correlation, you will be asked to press "R" key if this was a real HIT where the correlation label will be hidden. 
+        <br>
+        <img  src="{{ server_location }}/static/images/70_80.png" alt="Example" height="300" width="600"/>
+        <br> 
+
+
+        Note there are cases where the difference in correlations is very small, like the one shown in the figure below. In these cases, please try your best to distinguish, but it's fine if you don't always get the right answers. 
+        <img  src="{{ server_location }}/static/images/70_65.png" alt="Example" height="300" width="600"/>
+
+
+        <script type="text/javascript">
+        //console.log(psiTurk.getInstructionIndicator())
+        </script>
+
+    </div>
+
+    <hr />
+
+    <div class="instructionsnav">
+        <div class="row">
+            <div class="col-xs-2">
+                <button type="button" id="prev" value="prev" class="btn btn-primary btn-lg previous">
+                <span class="glyphicon glyphicon-arrow-left"></span> Previous
+                </button>
+            </div>
+            <div class="col-xs-8">
+            </div>
+            <div class="col-xs-2">
+                <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
+                Next <span class="glyphicon glyphicon-arrow-right"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

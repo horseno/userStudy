@@ -114,9 +114,9 @@ def binnedScatterPlot(r1,r2,N,domain,transFunc):
     ax2.set_title("r = "+str(r2))
 
     plt.show()
-    fig.savefig("70_100")
+    #fig.savefig("70_100")
     return fig
 
 #scatterPlot(0.8,0.5,100)
 #binned(0.8,10000,100,logNorm)
-binnedScatterPlot(0.7,1,500,50,logNorm)
+binnedScatterPlot(0.2,0.45,500,50,logNorm)

@@ -5,7 +5,7 @@
  */
 
 // Initalize psiturk object
-var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);
+var psiTurk = new PsiTurk(uniqueId, adServerLoc);
 
 var mycondition = condition;  // these two variables are passed by the psiturk server process
 var mycounterbalance = counterbalance;  // they tell you which condition you have been assigned to
@@ -45,7 +45,7 @@ var instructionPages = [ // add as a list as many pages as you like
 * STROOP TEST       *
 ********************/
 
-var StroopExperiment = function(targetR,startingDis) {
+var StroopExperiment = function(targetR,startingDis,mode) {
 
 	var wordon, // time word is presented
 	    listening = false;
@@ -79,7 +79,7 @@ var StroopExperiment = function(targetR,startingDis) {
 			
 			wordon = new Date().getTime();
 			listening = true;
-			d3.select("#query").html('<h3 id="prompt">Type "L" for the left figure, "R" for the right figure.</h3>');
+			d3.select("#query").html('<h3 id="prompt">Press "L" or the left arrow <span class="glyphicon glyphicon-arrow-left"></span> for the left figure.<br> Press"R" or the right arrow <span class="glyphicon glyphicon-arrow-right"></span> for the right figure.</h3>');
 		}
 	};
 	
@@ -90,6 +90,12 @@ var StroopExperiment = function(targetR,startingDis) {
 			response;
 
 		switch (keyCode) {
+			case 37:// left arrow
+				response="Left";
+				break;
+			case 39:
+				response="Right";
+				break;
 			case 76:
 				// "L"
 				response="Left";
@@ -266,6 +272,6 @@ var currentview;
 $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new StroopExperiment(0.5,0.15); } // what you want to do when you are done with instructions
+    	function() { currentview = new StroopExperiment(0.9,0.10,"Above"); } // what you want to do when you are done with instructions
     );
 });

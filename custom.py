@@ -141,7 +141,7 @@ def query():
 def check_window():
     data = json.loads(request.data)
     ratio = stat_test.F_test(data)
-    print ratio
+    #print ratio
     if ratio<0.25:
         return json.dumps({"status":"OK"})
     else:

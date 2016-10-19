@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 #DB settings
-db_url = "sqlite:///DB/participants-10-18.db"
+db_url = "sqlite:///../participants-r.db"
 table_name = 'turkdemo'
 data_column_name = 'datastring'
 #Reject rule settings

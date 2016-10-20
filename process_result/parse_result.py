@@ -27,24 +27,24 @@ reject_f = open(reject_list, 'r')
 rejected = reject_f.readline().split(" ")
 
 
-JND_dic = {0.5:[],0.6:[],0.7:[]}
+JND_dic = {0.2:[],0.3:[],0.4:[],0.5:[],0.6:[],0.7:[]}
 
 for fileName in os.listdir(data_path):
         assignmentID = fileName.split(".")[0] 
         if not assignmentID in rejected:
             dataframe = pd.read_csv(data_path+fileName)
             dataframe = dataframe.loc[dataframe['phase'] == "TEST"]
-            targetR = dataframe.iloc[0]['targetR']
+            targetR = round(dataframe.iloc[0]['targetR'],2)
             distance = np.array(get_seq(dataframe))
-            print "targetR " + str(targetR)
+            #print "targetR " + str(targetR)
             JND_dic[targetR].append(distance[-24:].mean())
             
 
-#for i in JND_dic:
-#    print i
-#    print JND_dic[i]
-#    if len(JND_dic[i]):
-#        JND_dic[i] = sum(JND_dic[i])/float(len(JND_dic[i]))
+for i in JND_dic:
+    print i 
+    print JND_dic[i]
+    if len(JND_dic[i]):
+        print sum(JND_dic[i])/float(len(JND_dic[i]))
 #print JND_dic 
 
 if __name__=="__main__":

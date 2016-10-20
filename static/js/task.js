@@ -30,6 +30,7 @@ var instructionPages = [ // add as a list as many pages as you like
 	//"instructions/instruct-ready.html"
 ];
 
+var phase; // track if current phase. 
 
 /********************
 * HTML manipulation
@@ -45,21 +46,52 @@ var instructionPages = [ // add as a list as many pages as you like
 * STROOP TEST       *
 ********************/
 
-var StroopExperiment = function(targetR,startingDis,mode) {
+var StroopExperiment = function() {
 
 	var wordon, // time word is presented
 	    listening = false;
 
 	// Stimuli for a basic Stroop experiment
-	
-	var MODE = "Above"; // task mode: the variable r is above or below the target.
+	var targetR, startingDis,MODE;
+	var task;
+	//var MODE //= "Above"; // task mode: the variable r is above or below the target.
 
-	var variableR = (MODE=="Above")? targetR+startingDis: targetR- startingDis;
+	var variableR; //= (MODE=="Above")? targetR+startingDis: targetR- startingDis;
 	var answer = "Left";
 	var iniTrials = 24;
 	var totalTrial = 50;
 	var totalTrialsLeft = totalTrial;
 	var windows=[];
+
+	var get_task = function(){
+		$.ajax({
+		    type: "POST",
+		    async:false,
+		    contentType: "application/json; charset=utf-8",
+		    url: "/get_task",
+		    data: JSON.stringify({"ID":uniqueId}),
+		    success: function (data) {     
+		    data = JSON.parse(data);
+		    task = data['task'];
+		    //console.log("gettask"+task);
+		   	},
+		   	dataType: "html"
+		 	});
+		if (task == "NO_MORE_TASK"){
+			alert("Sorry, currently no task available. Please leave the page.");
+			window.close();
+			}
+		else{
+
+			param_list = task.split(":");
+			console.log(param_list[0],param_list);
+			MODE = param_list[0];
+			targetR = parseFloat(param_list[1]);
+			startingDis = parseFloat(param_list[2]);
+			variableR = (MODE=="Above")? targetR+startingDis: targetR- startingDis;
+			}	
+		return 
+		}
 
 	var next = function() {
 		if (totalTrialsLeft<=0) {
@@ -78,12 +110,14 @@ var StroopExperiment = function(targetR,startingDis,mode) {
 			show_fig(targetR,variableR,answer);
 			
 			wordon = new Date().getTime();
-			listening = true;
-			d3.select("#query").html('<h3 id="prompt">Press "L" or the left arrow <span class="glyphicon glyphicon-arrow-left"></span> for the left figure.<br> Press"R" or the right arrow <span class="glyphicon glyphicon-arrow-right"></span> for the right figure.</h3>');
+			listening = false;
+		 	d3.select("#query").html('<h3 id="prompt">Press "L" or the left arrow <span class="glyphicon glyphicon-arrow-left"></span> for the left figure.<br> Press"R" or the right arrow <span class="glyphicon glyphicon-arrow-right"></span> for the right figure.</h3>');
+		 	$("#query").hide();
 		}
 	};
 	
 	var response_handler = function(e) {
+		console.log(listening);
 		if (!listening) return;
 
 		var keyCode = e.keyCode,
@@ -103,6 +137,10 @@ var StroopExperiment = function(targetR,startingDis,mode) {
 			case 82:
 				// "R"
 				response="Right";
+				break;
+			case 70:
+				//test for finish
+				finish();
 				break;
 		
 			default:
@@ -158,33 +196,34 @@ var StroopExperiment = function(targetR,startingDis,mode) {
 		    data: JSON.stringify(windows),
 		    success: function (data) {     
 		    	data = JSON.parse(data);
-		    	console.log(data);
-
-		   		if (data["status"]=='OK'){ console.log("OK"); return_val= true;}
+		   		if (data["status"]=='OK'){  return_val= true;}
 		   	},
 		 	});
 		return return_val;
 	}
 
 	var show_fig = function(targetR, variableR,answer) {
+	listening = false;
 	LowerR = (MODE=="Below")? variableR:targetR
 	HigherR= (MODE=="Above")? variableR:targetR
 	//assign the figure r according to the answer.
 	var qu = (answer=="Left")? {"r1":HigherR,"r2":LowerR}:{"r2":HigherR,"r1":LowerR}
 
   	$.ajax({
-    type: "POST",
-    async:true,
-    contentType: "application/json; charset=utf-8",
-    url: "/query",
-    data: JSON.stringify(qu),
-    success: function (data) {     
-     var graph = $("#stim");
-     graph.html(data);  
-     $("#loading").hide(); 
-     $("#stim").show();
-   	},
-   	dataType: "html"
+	    type: "POST",
+	    async:true,
+	    contentType: "application/json; charset=utf-8",
+	    url: "/query",
+	    data: JSON.stringify(qu),
+	    success: function (data) {     
+	     var graph = $("#stim");
+	     graph.html(data);  
+	     $("#loading").hide(); 
+	     $("#stim").show();
+	     $("#query").show();
+	     listening = true;
+	   	},
+	   	dataType: "html"
  	});
 
 	};
@@ -193,13 +232,33 @@ var StroopExperiment = function(targetR,startingDis,mode) {
 		d3.select("#word").remove();
 	};
 
-	
+	get_task();
+
+	$(window).on("unload", function(){
+			console.log("closing test");
+			//console.log(currentview);
+			if ((task!="NO_MORE_TASK") & (phase!= "finished")){
+				$.ajax({
+				    type: "POST",
+				    async: false,
+				    url: "/return_task",
+    				contentType: "application/json; charset=utf-8",
+   					data: JSON.stringify({"task":task,"ID":uniqueId}), //{"task":task}
+				 	});
+			}
+				return null;
+			});
+
+
+
 	// Load the stage.html snippet into the body of the page
 	psiTurk.showPage('stage.html');
 
 	// Register the response handler that is defined above to handle any
 	// key down events.
 	$("body").focus().keydown(response_handler); 
+
+
 
 	// Start the test
 	next();
@@ -250,6 +309,7 @@ var Questionnaire = function() {
 	psiTurk.recordTrialData({'phase':'postquestionnaire', 'status':'begin'});
 	
 	$("#next").click(function () {
+		phase = "finished";
 	    record_responses();
 	    psiTurk.saveData({
             success: function(){
@@ -272,6 +332,6 @@ var currentview;
 $(window).load( function(){
     psiTurk.doInstructions(
     	instructionPages, // a list of pages you want to display in sequence
-    	function() { currentview = new StroopExperiment(0.9,0.10,"Above"); } // what you want to do when you are done with instructions
+    	function() { currentview = new StroopExperiment(); } // what you want to do when you are done with instructions
     );
 });

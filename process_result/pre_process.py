@@ -4,11 +4,11 @@ import pandas as pd
 import os
 
 #DB settings
-db_url = "sqlite:///../participants-r.db"
+db_url = "sqlite:///../participants-04.db"
 table_name = 'turkdemo'
 data_column_name = 'datastring'
 #Reject rule settings
-obvious_range={0.7:(0.4,0.9),0.5:(0.2,0.8),0.6:(0.3,0.9)}
+obvious_range={0.2:(0,0.8),0.3:(0,0.8),0.4:(0,0.8),0.5:(0.2,0.8),0.6:(0.3,0.9),0.7:(0.4,0.9)}
 #Any value out of the range should be obviously distinguishable by a user with understanding of correlation.
 
 
@@ -37,12 +37,14 @@ def load_from_db(data_path):
 
             data = json.loads(row[data_column_name])['data']
             question = json.loads(row[data_column_name])['questiondata']
-            question_data.append(question)
+
             for record in data:
                 record['trialdata']['uniqueid'] = record['uniqueid']
                 uniqueid = record['uniqueid'].split(":")[1] 
-    
 
+            question['uniqueid']= data[0]['uniqueid']
+            question_data.append(question)
+            
             data = [record['trialdata'] for record in data]
             data.append(question)
             data_frame = pd.DataFrame(data)

@@ -34,7 +34,7 @@ from mpld3 import plugins
 import data_gen
 s = json.load(open("./static/bmh_matplotlibrc.json"))
 matplotlib.rc(s)
-
+import threading
 import stat_test
 # load the configuration options
 config = PsiturkConfig()
@@ -49,6 +49,9 @@ DOMAIN = 50
 SMAPLE_SIZE =500
 TRANS_FUNC = data_gen.logNorm
 ############################
+# task assignment settings
+taskFile = "task.json"
+lock = threading.Lock()
 
 ###########################################################
 #  serving warm, fresh, & sweet custom, user-provided routes
@@ -124,7 +127,6 @@ def compute_bonus():
         abort(404)  # again, bad to display HTML, but...
 
 def draw_fig(r1,r2):
-    #print r1,r2
     fig = data_gen.binnedScatterPlot(float(r1),float(r2),N=SMAPLE_SIZE,domain= DOMAIN,transFunc=TRANS_FUNC)
     fig_html = mpld3.fig_to_html(fig) 
 
@@ -134,6 +136,7 @@ def draw_fig(r1,r2):
 
 @custom_code.route('/query', methods=['POST'])
 def query():
+
     data = json.loads(request.data)
     return draw_fig(data["r1"],data["r2"])
 
@@ -146,5 +149,47 @@ def check_window():
         return json.dumps({"status":"OK"})
     else:
         return json.dumps({"status":"CONT"})
+
+@custom_code.route('/get_task', methods=['POST'])
+def get_task():
+    data = json.loads(request.data)
+    print "get task",data['ID']
+    with lock:
+        with open(taskFile, 'r') as taskfile:
+            taskDic = json.load(taskfile)
+        #iterate to get non zero 
+        noMoreTask = True
+        for key in taskDic:
+            if taskDic[key]>0:
+                taskDic[key]-=1
+                noMoreTask = False
+                break
+        if noMoreTask:
+            return json.dumps({"task": "NO_MORE_TASK"})
+
+        with open(taskFile, 'w') as taskfile:
+            json.dump(taskDic, taskfile)    
+        print key,taskDic[key]
+
+    return json.dumps({"task": key})
+
+@custom_code.route('/return_task', methods=['POST'])
+def return_task():
+    data = json.loads(request.data)
+    taskName = data["task"]
+    print "return task****", data['ID']
+
+    with lock:
+        with open(taskFile, 'r') as taskfile:
+            tasks = json.load(taskfile)
+            tasks[taskName] +=1
+
+        with open(taskFile, 'w') as taskfile:
+            json.dump(tasks, taskfile) 
+
+        print taskName,tasks[taskName]
+    return json.dumps({"status": 200})
+
+
 
 

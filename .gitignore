@@ -99,3 +99,7 @@ process_result/approve_list
 process_result/reject_list
 
 .psiturk_history
+
+task.json
+
+test_fig.png

@@ -106,17 +106,17 @@ def binnedScatterPlot(r1,r2,N,domain,transFunc):
 
     sns.heatmap(arr1, square = True,center =0,vmax =1,xticklabels= False,yticklabels=False,cbar=False,\
                       linewidths=0.0,ax= ax1)
-    ax1.set_title("r = "+str(r1))
+    #ax1.set_title("r = "+str(r1))
     ax2 = fig.add_subplot(122)
      
     sns.heatmap(arr2, square = True,center =0,vmax =1,xticklabels= False,yticklabels=False,cbar=False,\
                       linewidths=0.0,ax= ax2)
-    ax2.set_title("r = "+str(r2))
+    #ax2.set_title("r = "+str(r2))
 
     plt.show()
-    #fig.savefig("70_100")
+    fig.savefig("test_fig")
     return fig
 
 #scatterPlot(0.8,0.5,100)
 #binned(0.8,10000,100,logNorm)
-binnedScatterPlot(0.2,0.45,500,50,logNorm)
+binnedScatterPlot(0.4,0.6,500,50,logNorm)
